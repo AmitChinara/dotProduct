@@ -9,7 +9,7 @@ from ..serializers import TransactionSerializer
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getIncomes(request):
-    incomes = Transaction.objects.filter(user_id=request.user, transaction_type='income')
+    incomes = Transaction.objects.filter(updated_by=request.user, transaction_type='income')
     serializer = TransactionSerializer(incomes, many=True)
     return Response({'status': 200, 'payload': serializer.data})
 
@@ -37,7 +37,7 @@ def createIncome(request):
 @permission_classes([IsAuthenticated])
 def updateIncome(request, id):
     try:
-        income = Transaction.objects.get(id=id, user_id=request.user, transaction_type='income')
+        income = Transaction.objects.get(id=id, updated_by=request.user, transaction_type='income')
     except Transaction.DoesNotExist:
         return Response({'status': 404, 'message': 'Income not found'})
 
@@ -54,7 +54,7 @@ def updateIncome(request, id):
 @permission_classes([IsAuthenticated])
 def deleteIncome(request, id):
     try:
-        income = Transaction.objects.get(id=id, user_id=request.user, transaction_type='income')
+        income = Transaction.objects.get(id=id, updated_by=request.user, transaction_type='income')
         income.delete()
         return Response({'status': 200, 'message': 'Income deleted successfully'})
     except Transaction.DoesNotExist:

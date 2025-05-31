@@ -9,6 +9,7 @@ const Dashboard = ({ onLogout, token }) => {
     const [incomeData, setIncomeData] = useState([]);
     const [expenseData, setExpenseData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [categories, setCategories] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -17,21 +18,43 @@ const Dashboard = ({ onLogout, token }) => {
                     headers: { Authorization: `Token ${token}` },
                 };
 
-                const incomeRes = await axios.get('http://127.0.0.1:8000/api/income/', config);
-                const expenseRes = await axios.get('http://127.0.0.1:8000/api/expenses/', config);
+                // Fetch categories first
+                const categoriesRes = await axios.get('http://127.0.0.1:8000/api/category/', config);
+                const categoriesData = categoriesRes.data.payload;
 
-                const formattedIncome = incomeRes.data.payload.map(item => ({
-                    category: item.name,
-                    amount: parseFloat(item.amount),
-                }));
+                // Create a map from category_id to category_name
+                const categoryMap = {};
+                categoriesData.forEach(cat => {
+                    categoryMap[cat.id] = cat.name;
+                });
+                setCategories(categoriesData);
 
-                const formattedExpense = expenseRes.data.payload.map(item => ({
-                    category: item.name,
-                    amount: parseFloat(item.amount),
-                }));
+                // Fetch income and expenses
+                const [incomeRes, expenseRes] = await Promise.all([
+                    axios.get('http://127.0.0.1:8000/api/income/', config),
+                    axios.get('http://127.0.0.1:8000/api/expenses/', config),
+                ]);
 
-                setIncomeData(formattedIncome);
-                setExpenseData(formattedExpense);
+                // Group by category name using categoryMap
+                const groupByCategory = (data) => {
+                    const map = {};
+                    data.forEach(item => {
+                        const categoryName = categoryMap[item.category_id] || 'Unknown';
+                        const amount = parseFloat(item.amount);
+                        if (map[categoryName]) {
+                            map[categoryName] += amount;
+                        } else {
+                            map[categoryName] = amount;
+                        }
+                    });
+                    return Object.entries(map).map(([category, amount]) => ({
+                        category,
+                        amount
+                    }));
+                };
+
+                setIncomeData(groupByCategory(incomeRes.data.payload));
+                setExpenseData(groupByCategory(expenseRes.data.payload));
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -41,6 +64,7 @@ const Dashboard = ({ onLogout, token }) => {
 
         fetchData();
     }, [token]);
+
 
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28FFF', '#FF6B6B'];
 
