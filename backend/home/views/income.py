@@ -21,6 +21,8 @@ def createIncome(request):
     data = request.data.copy()
     data['user_id'] = request.user.id
     data['transaction_type'] = 'income'
+    data['created_by'] = request.user.username
+    data['updated_by'] = request.user.username
 
     serializer = TransactionSerializer(data=data)
     if not serializer.is_valid():

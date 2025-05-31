@@ -1,31 +1,28 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Login from './components/Login';
-import Dashboard from './components/Dashboard';
+import Dashboard from './components/Dashboard'; // protected content
 
 function App() {
-    // Initialize token from localStorage if present
-    const [token, setToken] = useState(localStorage.getItem('token'));
+    const [authToken, setAuthToken] = useState(localStorage.getItem('authToken'));
 
-    // When login succeeds, update both localStorage and React state
-    const handleLogin = (newToken) => {
-        localStorage.setItem('token', newToken);
-        setToken(newToken);  // This should trigger re-render
+    const handleLogin = (token) => {
+        localStorage.setItem('authToken', token);
+        setAuthToken(token);
     };
 
-    // When logging out, clear both
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        setToken(null);
+        localStorage.removeItem('authToken');
+        setAuthToken(null);
     };
 
     return (
-        <div>
-            {!token ? (
-                <Login onLogin={handleLogin} />
+        <>
+            {authToken ? (
+                <Dashboard onLogout={handleLogout} token={authToken} />
             ) : (
-                <Dashboard onLogout={handleLogout} />
+                <Login onLogin={handleLogin} />
             )}
-        </div>
+        </>
     );
 }
 

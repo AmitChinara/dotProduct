@@ -1,45 +1,101 @@
 .dashboard-container {
     min-height: 100vh;
+    background-color: #f4f6f8;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px 40px;
+}
+
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.header-row h2 {
+    font-size: 2rem;
+    color: #333;
+    margin: 0;
+}
+
+.header-row button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 14%;
+}
+
+.header-row button:hover {
+    background-color: #0056b3;
+}
+
+.charts-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.chart-wrapper {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.chart-wrapper h3 {
+    margin-bottom: 15px;
+    color: #444;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.chart-placeholder {
+    width: 250px;
+    height: 250px;
+    background-color: #e2e8f0;
+    border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(to right, #74ebd5, #acb6e5);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    padding: 20px;
+    color: #666;
+    font-style: italic;
 }
 
-.dashboard-card {
-    background-color: white;
-    padding: 40px 50px;
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    text-align: center;
-    width: 100%;
-    max-width: 500px;
-    transition: all 0.3s ease-in-out;
+.total-amount {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #2c3e50;
 }
 
-.dashboard-card h2 {
-    margin-bottom: 20px;
-    font-size: 28px;
+.balance-box {
+    position: fixed;
+    bottom: 30px;
+    right: 40px;
+    background-color: #ffffff;
+    border: 2px solid #007bff;
+    border-radius: 12px;
+    padding: 15px 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-size: 1.2rem;
     color: #333;
+    text-align: center;
 }
 
-.dashboard-card button {
-    background-color: #007BFF;
-    color: white;
-    padding: 1px 2px;        /* Reduced padding */
-    border: none;
-    border-radius: 6px;
-    font-size: 14px;           /* Smaller font */
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    display: inline-block;     /* Prevent stretching */
-    width: auto;               /* Avoid full width */
-    margin-top: 20px;
-}
-
-
-.dashboard-card button:hover {
-    background-color: #0056b3;
+.balance-box h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #007bff;
 }
