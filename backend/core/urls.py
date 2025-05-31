@@ -1,7 +1,8 @@
+# core/urls.py
 from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('home.urls')),  # assumes 'home' is in INSTALLED_APPS
+    path('api/', include('home.urls')),  # This line includes your app's URLs
 ]

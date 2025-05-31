@@ -9,7 +9,7 @@ from ..serializers import TransactionSerializer
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getExpenses(request):
-    expenses = Transaction.objects.filter(user_id=request.user, transaction_type='expense')
+    expenses = Transaction.objects.filter(transaction_type='expense')
     serializer = TransactionSerializer(expenses, many=True)
     return Response({'status': 200, 'payload': serializer.data})
 
@@ -21,6 +21,8 @@ def createExpenses(request):
     data = request.data.copy()
     data['user_id'] = request.user.id
     data['transaction_type'] = 'expense'
+    data['created_by'] = request.user.username
+    data['updated_by'] = request.user.username
 
     serializer = TransactionSerializer(data=data)
     if not serializer.is_valid():
@@ -35,7 +37,7 @@ def createExpenses(request):
 @permission_classes([IsAuthenticated])
 def updateExpenses(request, id):
     try:
-        expense = Transaction.objects.get(id=id, user_id=request.user, transaction_type='expense')
+        expense = Transaction.objects.get(id=id, transaction_type='expense')
     except Transaction.DoesNotExist:
         return Response({'status': 404, 'message': 'Expense not found'})
 
@@ -52,7 +54,7 @@ def updateExpenses(request, id):
 @permission_classes([IsAuthenticated])
 def deleteExpenses(request, id):
     try:
-        expense = Transaction.objects.get(id=id, user_id=request.user, transaction_type='expense')
+        expense = Transaction.objects.get(id=id, transaction_type='expense')
         expense.delete()
         return Response({'status': 200, 'message': 'Expense deleted successfully'})
     except Transaction.DoesNotExist:
