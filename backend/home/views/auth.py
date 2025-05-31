@@ -20,9 +20,7 @@ def loginView(request):
     user = authenticate(request, username=username, password=password)
     if user is not None:
         token, created = Token.objects.get_or_create(user=user)
-        response = Response({'message': f'{token.key} Login successful'}, status=status.HTTP_200_OK)
-        response['Authorization'] = f'Token {token.key}'
-        return response
+        return Response({'token': token.key}, status=status.HTTP_200_OK)
     else:
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
