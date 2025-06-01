@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: 'https://vercel.com/amitchinaras-projects/dot-product/api/',
+    baseURL: 'https://dotproduct-02kn.onrender.com/api/',
 });
 
 // Use 'authToken' to match your login/localStorage usage
