@@ -472,7 +472,7 @@ const Dashboard = ({ onLogout, token }) => {
                 </div>
             </div>
             {/* Sticky Balance Box */}
-            <div className="balance-box">
+            <div className="balance-box fixed-balance">
                 Balance: ₹ {balance.toLocaleString()}
             </div>
             {/* Modal for Pie slice details */}

@@ -182,9 +182,6 @@
 
 /* Balance Box */
 .balance-box {
-    position: fixed;
-    bottom: 30px;
-    right: 40px;
     background-color: #ffffff;
     border: 2px solid #007bff;
     border-radius: 12px;
@@ -195,6 +192,14 @@
     text-align: center;
     min-width: 180px;
     font-weight: bold;
+}
+
+/* Always show balance box fixed at bottom right */
+.fixed-balance {
+    position: fixed;
+    bottom: 30px;
+    right: 40px;
+    z-index: 1200;
 }
 
 /* Modal Styles */
