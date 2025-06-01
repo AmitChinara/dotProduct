@@ -20,8 +20,8 @@ def getCategories(request):
 @permission_classes([IsAuthenticated])
 def createCategory(request):
     data = request.data.copy()
-    data['created_by'] = request.user.id
-    data['updated_by'] = request.user.id
+    data['created_by'] = request.user.username
+    data['updated_by'] = request.user.username
 
     category_serializers = CategorySerializer(data=data)  # Deserialize incoming data
 

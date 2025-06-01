@@ -3,13 +3,13 @@
     background-color: #f4f6f8;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     padding: 20px 40px;
+    position: relative;
 }
 
 .header-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
     margin-bottom: 30px;
 }
 
@@ -19,7 +19,9 @@
     margin: 0;
 }
 
-.header-row button {
+/* New Transaction Button - matches your header button style */
+.header-row button,
+.new-transaction-btn {
     padding: 10px 20px;
     font-size: 1rem;
     color: white;
@@ -31,18 +33,153 @@
     width: 14%;
 }
 
-.header-row button:hover {
+.header-row button:hover,
+.new-transaction-btn:hover {
     background-color: #0056b3;
+}
+
+.main-content {
+    display: flex;
+    gap: 40px;
 }
 
 .charts-area {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 40px;
-    justify-content: flex-start;
-    align-items: flex-start;
+    overflow-x: auto;
 }
 
+.transaction-table-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    flex-grow: 1;
+    max-width: 400px;
+    height: fit-content;
+}
+
+.transaction-table-container h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.filter-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+    padding: 16px;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+}
+
+.filter-container label {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9rem;
+    color: #444;
+    font-weight: 500;
+}
+
+.filter-container input,
+.filter-container select {
+    margin-top: 6px;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+}
+
+/* Filter button should span full width on small screens, auto on larger */
+.filter-container .filter-button {
+    align-self: end;
+    justify-self: start;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.filter-container .filter-button:hover {
+    background-color: #0056b3;
+}
+
+/* Transaction table */
+.transaction-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.transaction-table th,
+.transaction-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    font-size: 0.9rem;
+}
+
+.transaction-table th {
+    background-color: #f2f2f2;
+    text-align: left;
+    font-weight: 600;
+}
+
+.transaction-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.transaction-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.transaction-table input[type='checkbox'] {
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.pagination button {
+    margin: 0 4px;
+    padding: 6px 10px;
+    border: 1px solid #007bff;
+    background-color: white;
+    color: #007bff;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.pagination button:hover {
+    background-color: #e6f0ff;
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination .active {
+    background-color: #007bff;
+    color: white;
+    border-color: #0056b3;
+}
+
+/* Chart wrapper */
 .chart-wrapper {
     background: white;
     border-radius: 10px;
@@ -98,4 +235,106 @@
     margin: 0;
     font-size: 1.1rem;
     color: #007bff;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.modal-content {
+    position: relative;
+    background-color: white;
+    padding: 20px 20px 10px 20px;
+    width: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Close button on modal */
+.modal-close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+    color: #333;
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: fit-content;
+}
+
+/* Modal form styles */
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.modal-content label {
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="number"],
+.modal-content input[type="date"],
+.modal-content select {
+    margin-top: 6px;
+    padding: 8px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    transition: border-color 0.3s ease;
+}
+
+.modal-content input[type="text"]:focus,
+.modal-content input[type="number"]:focus,
+.modal-content input[type="date"]:focus,
+.modal-content select:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.modal-content button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    font-weight: 600;
+    padding: 10px 0;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.modal-content button[type="submit"]:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.modal-content button[type="submit"]:disabled {
+    background-color: #a0c1f7;
+    cursor: not-allowed;
+}
+
+/* Error message inside modal */
+.modal-content p {
+    color: red;
+    font-size: 13px;
+    margin: 0;
 }

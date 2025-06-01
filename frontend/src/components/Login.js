@@ -1,43 +1,31 @@
-import { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import axios from 'axios';
-import './Login.css';
-import API_ENDPOINTS from '../config/apiConfig';
-import { AuthContext } from '../auth/AuthContext';
+import './Login.css';  // Add this import
 
-function Login() {
+const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const { login } = useContext(AuthContext);
-    const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        setError(''); // clear error before new attempt
-
         try {
-            const response = await axios.post(API_ENDPOINTS.LOGIN, {
+            const response = await axios.post('http://127.0.0.1:8000/api/login/', {
                 username,
-                password
+                password,
             });
-
             const token = response.data.token;
-            if (token) {
-                login(token);
-                navigate('/dashboard');
-            } else {
-                setError('No token received from server');
-            }
-        } catch (err) {
-            console.error(err);
-            setError('Invalid credentials. Please try again.');
+            console.log(`token: ${token}`);
+            onLogin(token); // This should update App's token state immediately
+        } catch (error) {
+            setError('Invalid credentials');
         }
     };
 
+
     return (
         <div className="login-container">
-            <form className="login-form" onSubmit={handleSubmit}>
+            <form onSubmit={handleLogin} className="login-form">
                 <h2>Login</h2>
                 <input
                     type="text"
@@ -54,10 +42,10 @@ function Login() {
                     required
                 />
                 <button type="submit">Login</button>
-                {error && <p className="error-message">{error}</p>}
+                {error && <p className="error">{error}</p>}
             </form>
         </div>
     );
-}
+};
 
 export default Login;
