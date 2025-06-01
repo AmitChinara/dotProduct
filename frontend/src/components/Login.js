@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import axios from 'axios';
 import ROUTES from '../constants/routes';
-import './Login.css';  // Add this import
+import './Login.css';
+import axiosInstance from "../api/axiosInstance";  // Add this import
 
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
@@ -11,7 +11,7 @@ const Login = ({ onLogin }) => {
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(ROUTES.LOGIN_URL, {
+            const response = await axiosInstance.post(ROUTES.LOGIN_URL, {
                 username,
                 password,
             });
