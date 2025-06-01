@@ -1,182 +1,51 @@
 .dashboard-container {
-    min-height: 100vh;
+    min-height: 90vh;
+    width: 95vw;
     background-color: #f4f6f8;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     padding: 20px 40px;
     position: relative;
 }
 
-.header-row {
+/* Navigation Bar */
+.dashboard-navbar {
+    width: 98vw;
+    max-width: 1200px;
+    margin: 0 auto 28px auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    background: #fff;
+    color: #007bff;
+    padding: 10px 24px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
 }
-
-.header-row h2 {
-    font-size: 2rem;
-    color: #333;
-    margin: 0;
+.dashboard-title {
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: #111;
 }
-
-/* New Transaction Button - matches your header button style */
-.header-row button,
-.new-transaction-btn {
-    padding: 10px 20px;
-    font-size: 1rem;
+.dashboard-logout-btn {
+    background: #007bff;
     color: white;
-    background-color: #007bff;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-weight: 600;
+    font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    width: 14%;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    width: fit-content;
 }
 
-.header-row button:hover,
-.new-transaction-btn:hover {
-    background-color: #0056b3;
-}
-
-.main-content {
-    display: flex;
-    gap: 40px;
-}
-
+/* Charts Area */
 .charts-area {
     display: flex;
-    flex-wrap: nowrap;
     gap: 40px;
-    overflow-x: auto;
-}
-
-.transaction-table-container {
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    flex-grow: 1;
-    max-width: 400px;
-    height: fit-content;
-}
-
-.transaction-table-container h4 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 1.2rem;
-    color: #333;
-}
-
-.filter-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px;
-    margin-bottom: 20px;
-    padding: 16px;
-    border-radius: 10px;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-}
-
-.filter-container label {
-    display: flex;
-    flex-direction: column;
-    font-size: 0.9rem;
-    color: #444;
-    font-weight: 500;
-}
-
-.filter-container input,
-.filter-container select {
-    margin-top: 6px;
-    padding: 8px 10px;
-    font-size: 0.9rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    background-color: #fff;
-}
-
-/* Filter button should span full width on small screens, auto on larger */
-.filter-container .filter-button {
-    align-self: end;
-    justify-self: start;
-    padding: 10px 16px;
-    font-size: 0.9rem;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.filter-container .filter-button:hover {
-    background-color: #0056b3;
-}
-
-/* Transaction table */
-.transaction-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.transaction-table th,
-.transaction-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    font-size: 0.9rem;
-}
-
-.transaction-table th {
-    background-color: #f2f2f2;
-    text-align: left;
-    font-weight: 600;
-}
-
-.transaction-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.transaction-table tr:hover {
-    background-color: #f1f1f1;
-}
-
-.transaction-table input[type='checkbox'] {
-    transform: scale(1.1);
-    cursor: pointer;
-}
-
-/* Pagination */
-.pagination {
-    display: flex;
-    justify-content: center;
-    margin-top: 12px;
-}
-
-.pagination button {
-    margin: 0 4px;
-    padding: 6px 10px;
-    border: 1px solid #007bff;
-    background-color: white;
-    color: #007bff;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.pagination button:hover {
-    background-color: #e6f0ff;
-}
-
-.pagination button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.pagination .active {
-    background-color: #007bff;
-    color: white;
-    border-color: #0056b3;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
 }
 
 /* Chart wrapper */
@@ -190,26 +59,12 @@
     flex-direction: column;
     align-items: center;
 }
-
 .chart-wrapper h3 {
     margin-bottom: 15px;
     color: #444;
     font-weight: 600;
     font-size: 1.2rem;
 }
-
-.chart-placeholder {
-    width: 250px;
-    height: 250px;
-    background-color: #e2e8f0;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #666;
-    font-style: italic;
-}
-
 .total-amount {
     font-size: 1.1rem;
     font-weight: 600;
@@ -217,6 +72,115 @@
     color: #2c3e50;
 }
 
+/* Transactions Table */
+.transaction-wrapper {
+    flex: 1;
+    min-width: 500px;
+}
+.filter-row {
+    margin-bottom: 12px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.filter-row select,
+.filter-row input[type="number"],
+.filter-row input[type="date"] {
+    padding: 6px;
+    min-width: 100px;
+}
+.transaction-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+}
+.transaction-table th,
+.transaction-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    font-size: 0.9rem;
+}
+.transaction-table th {
+    background-color: #f2f2f2;
+    text-align: left;
+    font-weight: 600;
+}
+.transaction-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+.transaction-table tr:hover {
+    background-color: #f1f1f1;
+}
+.transaction-table input[type='checkbox'] {
+    transform: scale(1.1);
+    cursor: pointer;
+}
+.no-transactions {
+    padding: 12px;
+    text-align: center;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+.pagination button {
+    margin-right: 6px;
+    font-weight: normal;
+    background: none;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 2px 8px;
+    cursor: pointer;
+    background-color: white;
+    color: #007bff;
+    transition: background-color 0.2s;
+}
+.pagination button.active,
+.pagination button:disabled {
+    background-color: #e9ecef;
+    font-weight: bold;
+    color: #333;
+}
+.pagination button:last-child {
+    margin-right: 0;
+}
+
+/* Action Icons */
+.action-icons {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 10px;
+    min-height: 32px;
+}
+.edit-btn,
+.delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+.new-transaction-btn {
+    padding: 8px 16px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 8px;
+    transition: background-color 0.3s;
+}
+.new-transaction-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Balance Box */
 .balance-box {
     position: fixed;
     bottom: 30px;
@@ -229,12 +193,8 @@
     font-size: 1.2rem;
     color: #333;
     text-align: center;
-}
-
-.balance-box h4 {
-    margin: 0;
-    font-size: 1.1rem;
-    color: #007bff;
+    min-width: 180px;
+    font-weight: bold;
 }
 
 /* Modal Styles */
@@ -250,7 +210,6 @@
     justify-content: center;
     z-index: 999;
 }
-
 .modal-content {
     position: relative;
     background-color: white;
@@ -261,8 +220,6 @@
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
-
-/* Close button on modal */
 .modal-close-button {
     position: absolute;
     top: 10px;
@@ -274,15 +231,12 @@
     cursor: pointer;
     width: fit-content;
 }
-
-/* Modal form styles */
 .modal-content form {
     display: flex;
     flex-direction: column;
     gap: 15px;
     margin-top: 10px;
 }
-
 .modal-content label {
     font-weight: 600;
     color: #333;
@@ -290,7 +244,6 @@
     flex-direction: column;
     font-size: 14px;
 }
-
 .modal-content input[type="text"],
 .modal-content input[type="number"],
 .modal-content input[type="date"],
@@ -302,7 +255,6 @@
     border: 1px solid #ccc;
     transition: border-color 0.3s ease;
 }
-
 .modal-content input[type="text"]:focus,
 .modal-content input[type="number"]:focus,
 .modal-content input[type="date"]:focus,
@@ -310,7 +262,6 @@
     outline: none;
     border-color: #007bff;
 }
-
 .modal-content button[type="submit"] {
     background-color: #007bff;
     color: white;
@@ -322,19 +273,75 @@
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
-
 .modal-content button[type="submit"]:hover:not(:disabled) {
     background-color: #0056b3;
 }
-
 .modal-content button[type="submit"]:disabled {
     background-color: #a0c1f7;
     cursor: not-allowed;
 }
-
-/* Error message inside modal */
 .modal-content p {
     color: red;
     font-size: 13px;
     margin: 0;
+}
+.modal-form-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+.modal-form-actions button {
+    flex: 1;
+    cursor: pointer;
+}
+
+/* Bottom Bar Chart */
+.bottom-bar-chart {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    background: white;
+    border-top: 1px solid #eee;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+    padding: 16px 0 8px 0;
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.bottom-bar-chart-title {
+    width: 100%;
+    text-align: center;
+    margin: 0 0 18px 0;
+    font-weight: 600;
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: #333;
+}
+.bottom-bar-chart-controls {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+.bottom-bar-chart-controls label {
+    font-size: 15px;
+    color: #555;
+}
+.bottom-bar-chart-controls input[type="number"] {
+    width: 100px;
+    color: #00C49F;
+    font-weight: bold;
+    border: 1px solid #00C49F;
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-left: 4px;
+}
+.bottom-bar-chart-container {
+    width: 90vw;
+    max-width: 1200px;
+    height: 320px;
 }

@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import {
     PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer,
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, ReferenceLine,
-    AreaChart, Area, LineChart, Line, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
+    BarChart, Bar, XAxis, YAxis, CartesianGrid
 } from 'recharts';
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import './Dashboard.css'; // create your own CSS or inline styles as needed
+import './Dashboard.css';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28FFF', '#FF6B6B'];
 
 const Dashboard = ({ onLogout, token }) => {
-    const [incomeData, setIncomeData] = useState([]);
-    const [expenseData, setExpenseData] = useState([]);
     const [categories, setCategories] = useState([]);
     const [allTransactions, setAllTransactions] = useState([]);
     const [filteredTransactions, setFilteredTransactions] = useState([]);
@@ -33,102 +30,37 @@ const Dashboard = ({ onLogout, token }) => {
 
     const itemsPerPage = 7;
     const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
-
     const [year, setYear] = useState(new Date().getFullYear());
-    const [month, setMonth] = useState(new Date().getMonth());
     const [monthlyChartData, setMonthlyChartData] = useState([]);
-
-    // Add state for editable starting values
-    const [startingMonthlyIncome, setStartingMonthlyIncome] = useState(20000);
-
-    // Only show the expense for the selected month, allow user to select month
-    const [selectedMonth, setSelectedMonth] = useState(5); // Default to June (0-based)
-
-    const monthOptions = Array.from({ length: 12 }, (_, i) => ({
-        value: i,
-        label: new Date(0, i).toLocaleString('default', { month: 'long' })
-    }));
-
-    const selectedMonthExpenseData = monthlyChartData[selectedMonth]
-        ? [{ month: monthlyChartData[selectedMonth].month, expense: monthlyChartData[selectedMonth].expense, budget: startingMonthlyIncome }]
-        : [{ month: monthOptions[selectedMonth].label, expense: 0, budget: startingMonthlyIncome }];
-
-    // Data for RadarChart: compare budget vs actual expense for selected month
-    const radarData = [
-        {
-            metric: 'Budget',
-            value: startingMonthlyIncome,
-        },
-        {
-            metric: 'Expense',
-            value: selectedMonthExpenseData[0].expense,
-        }
-    ];
-
-    // Get available months for the selected year
-    const getAvailableMonths = () => {
-        // Always return Jan-Dec for consistency
-        return Array.from({ length: 12 }, (_, i) => ({
-            value: i,
-            label: new Date(0, i).toLocaleString('default', { month: 'long' })
-        }));
-    };
-
-    // Get selected month's data
-    const selectedMonthData = monthlyChartData[month] || { income: 0, expense: 0, month: getAvailableMonths()[month].label };
+    const [startingMonthlyIncome, setStartingMonthlyIncome] = useState(2000);
 
     // Fetch all data (categories, income, expenses)
     const fetchData = async () => {
         try {
             const config = { headers: { Authorization: `Token ${token}` } };
-
-            // Categories
             const categoriesRes = await axios.get('http://127.0.0.1:8000/api/category/', config);
             const categoriesData = categoriesRes.data.payload;
             setCategories(categoriesData);
             if (!formData.category_id && categoriesData.length > 0) {
                 setFormData(fd => ({ ...fd, category_id: categoriesData[0].id }));
             }
-
-            // Map category id => name
-            const catMap = {};
-            categoriesData.forEach(c => (catMap[c.id] = c.name));
-
-            // Income & Expense transactions
             const [incomeRes, expenseRes] = await Promise.all([
                 axios.get('http://127.0.0.1:8000/api/income/', config),
                 axios.get('http://127.0.0.1:8000/api/expenses/', config),
             ]);
-
             const allTx = [...incomeRes.data.payload, ...expenseRes.data.payload];
             setAllTransactions(allTx);
             setFilteredTransactions(allTx);
             setCurrentPage(1);
             setSelectedTransactions([]);
-
-            // Aggregate income by category
-            const aggregateByCategory = (data) => {
-                const map = {};
-                data.forEach(tx => {
-                    const name = catMap[tx.category_id] || 'Unknown';
-                    map[name] = (map[name] || 0) + parseFloat(tx.amount);
-                });
-                return Object.entries(map).map(([category, amount]) => ({ category, amount }));
-            };
-
-            setIncomeData(aggregateByCategory(incomeRes.data.payload));
-            setExpenseData(aggregateByCategory(expenseRes.data.payload));
         } catch (error) {
             console.error('Error loading data:', error);
         }
     };
 
-    useEffect(() => {
-        fetchData();
-    }, [token]);
+    // eslint-disable-next-line
+    useEffect(() => { fetchData(); }, [token]);
 
-    // Filter transactions on filter change or data change
     useEffect(() => {
         const { category, minAmount, maxAmount, date } = filters;
         const filtered = allTransactions.filter(tx => {
@@ -144,12 +76,44 @@ const Dashboard = ({ onLogout, token }) => {
         setSelectedTransactions([]);
     }, [filters, allTransactions, categories]);
 
-    // Calculate totals
-    const totalIncome = incomeData.reduce((sum, x) => sum + x.amount, 0);
-    const totalExpense = expenseData.reduce((sum, x) => sum + x.amount, 0);
-    const balance = totalIncome - totalExpense;
+    const filteredIncomeData = useMemo(() => {
+        const catMap = {};
+        categories.forEach(c => (catMap[c.id] = c.name));
+        const filtered = filteredTransactions.filter(tx => tx.transaction_type === 'income');
+        const map = {};
+        filtered.forEach(tx => {
+            const name = catMap[tx.category_id] || 'Unknown';
+            map[name] = (map[name] || 0) + parseFloat(tx.amount);
+        });
+        return Object.entries(map).map(([category, amount]) => ({ category, amount }));
+    }, [filteredTransactions, categories]);
 
-    // Helper to get all years present in transactions
+    const filteredExpenseData = useMemo(() => {
+        const catMap = {};
+        categories.forEach(c => (catMap[c.id] = c.name));
+        const filtered = filteredTransactions.filter(tx => tx.transaction_type === 'expense');
+        const map = {};
+        filtered.forEach(tx => {
+            const name = catMap[tx.category_id] || 'Unknown';
+            map[name] = (map[name] || 0) + parseFloat(tx.amount);
+        });
+        return Object.entries(map).map(([category, amount]) => ({ category, amount }));
+    }, [filteredTransactions, categories]);
+
+    const totalIncome = filteredIncomeData.reduce((sum, x) => sum + x.amount, 0);
+    const totalExpense = filteredExpenseData.reduce((sum, x) => sum + x.amount, 0);
+
+    // Calculate balance from all transactions, not filtered
+    const allIncome = useMemo(() =>
+        allTransactions.filter(tx => tx.transaction_type === 'income')
+            .reduce((sum, tx) => sum + parseFloat(tx.amount), 0)
+    , [allTransactions]);
+    const allExpense = useMemo(() =>
+        allTransactions.filter(tx => tx.transaction_type === 'expense')
+            .reduce((sum, tx) => sum + parseFloat(tx.amount), 0)
+    , [allTransactions]);
+    const balance = allIncome - allExpense;
+
     const getAvailableYears = () => {
         const years = new Set();
         allTransactions.forEach(tx => {
@@ -160,15 +124,12 @@ const Dashboard = ({ onLogout, token }) => {
         return Array.from(years).sort((a, b) => b - a);
     };
 
-    // Calculate monthly income/expense for selected year
     useEffect(() => {
-        // Prepare 12 months
         const months = Array.from({ length: 12 }, (_, i) => ({
             month: new Date(0, i).toLocaleString('default', { month: 'short' }),
             income: 0,
             expense: 0,
         }));
-
         allTransactions.forEach(tx => {
             if (!tx.created_at) return;
             const txDate = new Date(tx.created_at);
@@ -181,11 +142,9 @@ const Dashboard = ({ onLogout, token }) => {
                 months[mIdx].expense += parseFloat(tx.amount);
             }
         });
-
         setMonthlyChartData(months);
     }, [allTransactions, year]);
 
-    // Pie slice click to show modal with details
     const handleSliceClick = (categoryName, type) => {
         const filtered = allTransactions.filter(tx =>
             (categories.find(c => c.id === tx.category_id)?.name === categoryName)
@@ -200,18 +159,16 @@ const Dashboard = ({ onLogout, token }) => {
         setModalVisible(true);
     };
 
-    // Pagination slicing
     const startIndex = (currentPage - 1) * itemsPerPage;
     const currentTransactions = filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
+    const emptyRows = itemsPerPage - currentTransactions.length > 0 ? itemsPerPage - currentTransactions.length : 0;
 
-    // Checkbox toggle
     const handleCheckboxChange = (id) => {
         setSelectedTransactions(prev =>
             prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
         );
     };
 
-    // Logout
     const handleLogout = async () => {
         try {
             await axios.post('http://127.0.0.1:8000/api/logout/', {}, {
@@ -225,7 +182,6 @@ const Dashboard = ({ onLogout, token }) => {
         }
     };
 
-    // Delete selected transactions
     const handleDelete = async () => {
         if (!window.confirm(`Delete ${selectedTransactions.length} selected transaction(s)?`)) return;
         try {
@@ -246,7 +202,6 @@ const Dashboard = ({ onLogout, token }) => {
         }
     };
 
-    // Open edit form for single selected transaction
     const handleEdit = () => {
         if (selectedTransactions.length !== 1) return;
         const tx = allTransactions.find(t => t.id === selectedTransactions[0]);
@@ -262,13 +217,11 @@ const Dashboard = ({ onLogout, token }) => {
         setFormModalVisible(true);
     };
 
-    // Handle form input changes
     const handleFormChange = (e) => {
         const { name, value } = e.target;
         setFormData(fd => ({ ...fd, [name]: value }));
     };
 
-    // Submit new or edited transaction
     const handleFormSubmit = async (e) => {
         e.preventDefault();
         setFormLoading(true);
@@ -281,16 +234,13 @@ const Dashboard = ({ onLogout, token }) => {
                 name: formData.name,
                 amount: parseFloat(formData.amount),
             };
-
             if (formData.id) {
-                // Edit existing transaction
                 if (formData.transaction_type === 'income') {
                     await axios.put(`http://127.0.0.1:8000/api/income/update/${formData.id}/`, payload, config);
                 } else {
                     await axios.put(`http://127.0.0.1:8000/api/expenses/update/${formData.id}/`, payload, config);
                 }
             } else {
-                // New transaction
                 if (formData.transaction_type === 'income') {
                     await axios.post('http://127.0.0.1:8000/api/income/create/', payload, config);
                 } else {
@@ -307,7 +257,6 @@ const Dashboard = ({ onLogout, token }) => {
         }
     };
 
-    // Reset form on new transaction
     const openNewTransactionForm = () => {
         setFormData({
             transaction_type: 'income',
@@ -320,23 +269,53 @@ const Dashboard = ({ onLogout, token }) => {
         setFormModalVisible(true);
     };
 
+    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+
     return (
         <div className="dashboard-container" style={{ padding: 20, fontFamily: 'Arial, sans-serif', position: 'relative', minHeight: '100vh', paddingBottom: 270 }}>
-            <div className="header-row" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
-                <h2>DotProduct</h2>
-                <button onClick={handleLogout} style={{ cursor: 'pointer' }}>Logout</button>
-            </div>
-
+            {/* Navigation Bar */}
+            <nav style={{
+                width: '98vw',
+                maxWidth: 1200,
+                margin: '0 auto 28px auto',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                background: '#fff',
+                color: '#007bff',
+                padding: '10px 24px',
+                borderRadius: 10,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.07)'
+            }}>
+                <span style={{ fontWeight: 700, fontSize: 22, letterSpacing: 1, color: '#111' }}>DotProduct</span>
+                <button
+                    onClick={handleLogout}
+                    style={{
+                        background: '#007bff',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: 6,
+                        padding: '8px 18px',
+                        fontWeight: 600,
+                        fontSize: 16,
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                        width: 'fit-content'
+                    }}
+                >
+                    Logout
+                </button>
+            </nav>
             <div className="charts-area" style={{ display: 'flex', gap: 40, flexWrap: 'wrap', marginBottom: 32 }}>
                 {/* Income Pie Chart */}
                 <div className="chart-wrapper" style={{ width: 280, textAlign: 'center' }}>
                     <h3>Income</h3>
                     <p style={{ fontWeight: 'bold', fontSize: 18 }}>₹ {totalIncome.toLocaleString()}</p>
-                    {incomeData.length ? (
+                    {filteredIncomeData.length ? (
                         <ResponsiveContainer width="100%" height={250}>
                             <PieChart>
                                 <Pie
-                                    data={incomeData}
+                                    data={filteredIncomeData}
                                     dataKey="amount"
                                     nameKey="category"
                                     cx="50%"
@@ -344,10 +323,10 @@ const Dashboard = ({ onLogout, token }) => {
                                     outerRadius={80}
                                     fill="#0088FE"
                                     label
-                                    onClick={(_, idx) => handleSliceClick(incomeData[idx].category, 'income')}
+                                    onClick={(_, idx) => handleSliceClick(filteredIncomeData[idx].category, 'income')}
                                     cursor="pointer"
                                 >
-                                    {incomeData.map((entry, idx) => (
+                                    {filteredIncomeData.map((entry, idx) => (
                                         <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
                                     ))}
                                 </Pie>
@@ -362,11 +341,11 @@ const Dashboard = ({ onLogout, token }) => {
                 <div className="chart-wrapper" style={{ width: 280, textAlign: 'center' }}>
                     <h3>Expense</h3>
                     <p style={{ fontWeight: 'bold', fontSize: 18 }}>₹ {totalExpense.toLocaleString()}</p>
-                    {expenseData.length ? (
+                    {filteredExpenseData.length ? (
                         <ResponsiveContainer width="100%" height={250}>
                             <PieChart>
                                 <Pie
-                                    data={expenseData}
+                                    data={filteredExpenseData}
                                     dataKey="amount"
                                     nameKey="category"
                                     cx="50%"
@@ -374,10 +353,10 @@ const Dashboard = ({ onLogout, token }) => {
                                     outerRadius={80}
                                     fill="#FF6B6B"
                                     label
-                                    onClick={(_, idx) => handleSliceClick(expenseData[idx].category, 'expense')}
+                                    onClick={(_, idx) => handleSliceClick(filteredExpenseData[idx].category, 'expense')}
                                     cursor="pointer"
                                 >
-                                    {expenseData.map((entry, idx) => (
+                                    {filteredExpenseData.map((entry, idx) => (
                                         <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
                                     ))}
                                 </Pie>
@@ -391,8 +370,6 @@ const Dashboard = ({ onLogout, token }) => {
                 {/* Transactions Table */}
                 <div className="transaction-wrapper" style={{ flex: 1, minWidth: 500 }}>
                     <h3>All Transactions</h3>
-
-                    {/* Filters */}
                     <div
                         className="filter-row"
                         style={{ marginBottom: 12, display: 'flex', gap: 12, flexWrap: 'wrap' }}
@@ -407,7 +384,6 @@ const Dashboard = ({ onLogout, token }) => {
                                 <option key={cat.id} value={cat.name}>{cat.name}</option>
                             ))}
                         </select>
-
                         <input
                             type="number"
                             placeholder="Min Amount"
@@ -415,7 +391,6 @@ const Dashboard = ({ onLogout, token }) => {
                             onChange={e => setFilters(f => ({ ...f, minAmount: e.target.value }))}
                             style={{ padding: 6, width: 100 }}
                         />
-
                         <input
                             type="number"
                             placeholder="Max Amount"
@@ -423,7 +398,6 @@ const Dashboard = ({ onLogout, token }) => {
                             onChange={e => setFilters(f => ({ ...f, maxAmount: e.target.value }))}
                             style={{ padding: 6, width: 100 }}
                         />
-
                         <input
                             type="date"
                             value={filters.date}
@@ -431,8 +405,6 @@ const Dashboard = ({ onLogout, token }) => {
                             style={{ padding: 6 }}
                         />
                     </div>
-
-                    {/* Table */}
                     <table
                         className="transaction-table"
                         style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 10 }}
@@ -464,10 +436,17 @@ const Dashboard = ({ onLogout, token }) => {
                         )) : (
                             <tr><td colSpan={5} style={{ padding: 12, textAlign: 'center' }}>No transactions found</td></tr>
                         )}
+                        {Array.from({ length: emptyRows }).map((_, idx) => (
+                            <tr key={`empty-row-${idx}`}>
+                                <td style={{ padding: 6 }}>&nbsp;</td>
+                                <td style={{ padding: 6 }}></td>
+                                <td style={{ padding: 6 }}></td>
+                                <td style={{ padding: 6 }}></td>
+                                <td style={{ padding: 6 }}></td>
+                            </tr>
+                        ))}
                         </tbody>
                     </table>
-
-                    {/* Pagination */}
                     <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', flexDirection: 'row', gap: 4 }}>
                         {currentPage > 1 && (
                             <button
@@ -477,7 +456,6 @@ const Dashboard = ({ onLogout, token }) => {
                                 Prev
                             </button>
                         )}
-                        {/* Show up to 4 page numbers horizontally */}
                         {Array.from({ length: Math.min(totalPages, 4) }, (_, i) => i + 1).map(pageNum => (
                             <button
                                 key={pageNum}
@@ -505,33 +483,35 @@ const Dashboard = ({ onLogout, token }) => {
                             </button>
                         )}
                     </div>
-
-                    {/* Action Icons */}
-                    {selectedTransactions.length > 0 && (
-                        <div style={{ display: 'flex', gap: 15, alignItems: 'center', marginBottom: 10 }}>
-                            {/* Edit icon only if single transaction selected */}
-                            {selectedTransactions.length === 1 && (
-                                <button
-                                    onClick={handleEdit}
-                                    title="Edit"
-                                    style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-                                    aria-label="Edit transaction"
-                                >
-                                    <FaEdit size={22} color="#007bff" />
-                                </button>
-                            )}
-                            {/* Delete icon */}
+                    <div
+                        style={{
+                            display: 'flex',
+                            gap: 15,
+                            alignItems: 'center',
+                            marginBottom: 10,
+                            minHeight: 32,
+                            visibility: selectedTransactions.length > 0 ? 'visible' : 'hidden'
+                        }}
+                    >
+                        {selectedTransactions.length === 1 && (
                             <button
-                                onClick={handleDelete}
-                                title="Delete"
+                                onClick={handleEdit}
+                                title="Edit"
                                 style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-                                aria-label="Delete transaction(s)"
+                                aria-label="Edit transaction"
                             >
-                                <FaTrash size={22} color="#dc3545" />
+                                <FaEdit size={22} color="#007bff" />
                             </button>
-                        </div>
-                    )}
-
+                        )}
+                        <button
+                            onClick={handleDelete}
+                            title="Delete"
+                            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                            aria-label="Delete transaction(s)"
+                        >
+                            <FaTrash size={22} color="#dc3545" />
+                        </button>
+                    </div>
                     <button
                         onClick={openNewTransactionForm}
                         style={{ padding: '8px 16px', cursor: 'pointer' }}
@@ -540,7 +520,6 @@ const Dashboard = ({ onLogout, token }) => {
                     </button>
                 </div>
             </div>
-
             {/* Sticky Balance Box */}
             <div
                 className="balance-box"
@@ -563,7 +542,6 @@ const Dashboard = ({ onLogout, token }) => {
             >
                 Balance: ₹ {balance.toLocaleString()}
             </div>
-
             {/* Modal for Pie slice details */}
             {modalVisible && (
                 <div
@@ -649,22 +627,25 @@ const Dashboard = ({ onLogout, token }) => {
                         onClick={e => e.stopPropagation()}
                     >
                         <h3>{formData.id ? 'Edit Transaction' : 'New Transaction'}</h3>
-
-                        {/* Always show dropdown for type, even in edit mode */}
                         <label style={{ display: 'block', marginBottom: 6 }}>
                             Type:
-                            <select
-                                name="transaction_type"
-                                value={formData.transaction_type}
-                                onChange={handleFormChange}
-                                disabled={formLoading}
-                                style={{ marginLeft: 6 }}
-                            >
-                                <option value="income">Income</option>
-                                <option value="expense">Expense</option>
-                            </select>
+                            {formData.id ? (
+                                <span style={{ marginLeft: 8, fontWeight: 500, textTransform: 'capitalize' }}>
+                                    {formData.transaction_type}
+                                </span>
+                            ) : (
+                                <select
+                                    name="transaction_type"
+                                    value={formData.transaction_type}
+                                    onChange={handleFormChange}
+                                    disabled={formLoading}
+                                    style={{ marginLeft: 6 }}
+                                >
+                                    <option value="income">Income</option>
+                                    <option value="expense">Expense</option>
+                                </select>
+                            )}
                         </label>
-
                         <label style={{ display: 'block', marginBottom: 6 }}>
                             Category:
                             <select
@@ -680,7 +661,6 @@ const Dashboard = ({ onLogout, token }) => {
                                 ))}
                             </select>
                         </label>
-
                         <label style={{ display: 'block', marginBottom: 6 }}>
                             Name:
                             <input
@@ -693,7 +673,6 @@ const Dashboard = ({ onLogout, token }) => {
                                 style={{ width: '100%', padding: 6, marginTop: 4 }}
                             />
                         </label>
-
                         <label style={{ display: 'block', marginBottom: 6 }}>
                             Amount (₹):
                             <input
@@ -708,9 +687,7 @@ const Dashboard = ({ onLogout, token }) => {
                                 style={{ width: '100%', padding: 6, marginTop: 4 }}
                             />
                         </label>
-
                         {formError && <p style={{ color: 'red' }}>{formError}</p>}
-
                         <div style={{ marginTop: 10, display: 'flex', gap: 10 }}>
                             <button type="submit" disabled={formLoading} style={{ flex: 1, cursor: 'pointer' }}>
                                 {formLoading ? 'Saving...' : 'Save'}
@@ -730,7 +707,12 @@ const Dashboard = ({ onLogout, token }) => {
 
             {/* Monthly Income/Expense Chart at Bottom (not sticky) */}
             <div style={{
-                width: '100%',
+                width: '100vw',
+                position: 'relative',
+                left: '50%',
+                right: '50%',
+                marginLeft: '-50vw',
+                marginRight: '-50vw',
                 background: 'white',
                 borderTop: '1px solid #eee',
                 boxShadow: '0 -2px 8px rgba(0,0,0,0.04)',
@@ -740,20 +722,23 @@ const Dashboard = ({ onLogout, token }) => {
                 flexDirection: 'column',
                 alignItems: 'center'
             }}>
+                <h2 style={{
+                    width: '100%',
+                    textAlign: 'center',
+                    margin: '0 0 18px 0',
+                    fontWeight: 600,
+                    fontSize: 22,
+                    letterSpacing: 1,
+                    color: '#333'
+                }}>
+                    Monthly Expense vs Budget
+                </h2>
                 <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 24 }}>
                     <label>
                         Year:&nbsp;
                         <select value={year} onChange={e => setYear(Number(e.target.value))}>
                             {getAvailableYears().map(y => (
                                 <option key={y} value={y}>{y}</option>
-                            ))}
-                        </select>
-                    </label>
-                    <label>
-                        Month:&nbsp;
-                        <select value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))}>
-                            {monthOptions.map(m => (
-                                <option key={m.value} value={m.value}>{m.label}</option>
                             ))}
                         </select>
                     </label>
@@ -779,28 +764,32 @@ const Dashboard = ({ onLogout, token }) => {
                         </span>
                     </div>
                 </div>
-                {/* Show selected month's budget vs expense as a BarChart */}
-                <div style={{ width: 350, height: 300 }}>
+                <div style={{ width: '90vw', maxWidth: 1200, height: 320 }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={[
-                            { name: 'Budget', value: startingMonthlyIncome },
-                            { name: 'Expense', value: selectedMonthExpenseData[0].expense }
-                        ]}>
+                        <BarChart data={monthlyChartData.map(m => ({
+                            month: m.month,
+                            Expense: m.expense,
+                            Budget: startingMonthlyIncome
+                        }))}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
+                            <XAxis dataKey="month" />
                             <YAxis />
                             <Tooltip />
                             <Legend />
                             <Bar
-                                dataKey="value"
-                                name="Amount"
-                                barSize={60}
+                                dataKey="Budget"
+                                fill="#00C49F"
+                                barSize={28}
                                 radius={[8, 8, 0, 0]}
                                 label={{ position: 'top', fill: '#333', fontWeight: 600 }}
-                            >
-                                <Cell key="budget" fill="#00C49F" /> {/* Budget: greenish */}
-                                <Cell key="expense" fill="#FF6B6B" /> {/* Expense: reddish */}
-                            </Bar>
+                            />
+                            <Bar
+                                dataKey="Expense"
+                                fill="#FF6B6B"
+                                barSize={28}
+                                radius={[8, 8, 0, 0]}
+                                label={{ position: 'top', fill: '#333', fontWeight: 600 }}
+                            />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

@@ -5,4 +5,3 @@ urlpatterns = [
     path('category/', getCategories),            # GET all categories
     path('category/create/', createCategory),        # POST create new category
 ]
-
