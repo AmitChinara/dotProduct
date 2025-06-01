@@ -15,7 +15,6 @@ const Login = ({ onLogin }) => {
                 password,
             });
             const token = response.data.token;
-            console.log(`token: ${token}`);
             onLogin(token); // This should update App's token state immediately
         } catch (error) {
             setError('Invalid credentials');
