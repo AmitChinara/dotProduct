@@ -1,24 +1,19 @@
-import { useState } from 'react';
-import Login from './Login';
-import Dashboard from './Dashboard';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import { AuthProvider } from './auth/AuthContext';
 
 function App() {
-    const [authToken, setAuthToken] = useState(localStorage.getItem('authToken'));
-
-    const handleLogin = (token) => {
-        localStorage.setItem('authToken', token);
-        setAuthToken(token);
-    };
-
-    const handleLogout = () => {
-        localStorage.removeItem('authToken');
-        setAuthToken(null);
-    };
-
-    return authToken ? (
-        <Dashboard onLogout={handleLogout} token={authToken} />
-    ) : (
-        <Login onLogin={handleLogin} />
+    return (
+        <AuthProvider>
+            <Router>
+                <Routes>
+                    <Route path="/" element={<Login />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                </Routes>
+            </Router>
+        </AuthProvider>
     );
 }
 
