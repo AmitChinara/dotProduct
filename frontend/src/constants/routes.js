@@ -9,6 +9,7 @@ const ROUTES = {
     EXPENSES_UPDATE_URL: id => `expenses/update/${id}/`,
     INCOME_DELETE_URL: id => `income/delete/${id}/`,
     EXPENSES_DELETE_URL: id => `expenses/delete/${id}/`,
+    LOGIN_URL: 'login/',
 };
 
 export default ROUTES;
