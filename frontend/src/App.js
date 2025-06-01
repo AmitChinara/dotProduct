@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import Login from './components/Login';
-import Dashboard from './components/Dashboard'; // protected content
+import Login from './Login';
+import Dashboard from './Dashboard';
 
 function App() {
     const [authToken, setAuthToken] = useState(localStorage.getItem('authToken'));
@@ -15,14 +15,10 @@ function App() {
         setAuthToken(null);
     };
 
-    return (
-        <>
-            {authToken ? (
-                <Dashboard onLogout={handleLogout} token={authToken} />
-            ) : (
-                <Login onLogin={handleLogin} />
-            )}
-        </>
+    return authToken ? (
+        <Dashboard onLogout={handleLogout} token={authToken} />
+    ) : (
+        <Login onLogin={handleLogin} />
     );
 }
 
