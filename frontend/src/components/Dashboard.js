@@ -272,45 +272,22 @@ const Dashboard = ({ onLogout, token }) => {
     const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
 
     return (
-        <div className="dashboard-container" style={{ padding: 20, fontFamily: 'Arial, sans-serif', position: 'relative', minHeight: '100vh', paddingBottom: 270 }}>
+        <div className="dashboard-container">
             {/* Navigation Bar */}
-            <nav style={{
-                width: '98vw',
-                maxWidth: 1200,
-                margin: '0 auto 28px auto',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                background: '#fff',
-                color: '#007bff',
-                padding: '10px 24px',
-                borderRadius: 10,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.07)'
-            }}>
-                <span style={{ fontWeight: 700, fontSize: 22, letterSpacing: 1, color: '#111' }}>DotProduct</span>
+            <nav className="dashboard-navbar">
+                <span className="dashboard-title">DotProduct</span>
                 <button
                     onClick={handleLogout}
-                    style={{
-                        background: '#007bff',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: 6,
-                        padding: '8px 18px',
-                        fontWeight: 600,
-                        fontSize: 16,
-                        cursor: 'pointer',
-                        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-                        width: 'fit-content'
-                    }}
+                    className="dashboard-logout-btn"
                 >
                     Logout
                 </button>
             </nav>
-            <div className="charts-area" style={{ display: 'flex', gap: 40, flexWrap: 'wrap', marginBottom: 32 }}>
+            <div className="charts-area">
                 {/* Income Pie Chart */}
-                <div className="chart-wrapper" style={{ width: 280, textAlign: 'center' }}>
+                <div className="chart-wrapper">
                     <h3>Income</h3>
-                    <p style={{ fontWeight: 'bold', fontSize: 18 }}>₹ {totalIncome.toLocaleString()}</p>
+                    <p className="total-amount">₹ {totalIncome.toLocaleString()}</p>
                     {filteredIncomeData.length ? (
                         <ResponsiveContainer width="100%" height={250}>
                             <PieChart>
@@ -338,9 +315,9 @@ const Dashboard = ({ onLogout, token }) => {
                 </div>
 
                 {/* Expense Pie Chart */}
-                <div className="chart-wrapper" style={{ width: 280, textAlign: 'center' }}>
+                <div className="chart-wrapper">
                     <h3>Expense</h3>
-                    <p style={{ fontWeight: 'bold', fontSize: 18 }}>₹ {totalExpense.toLocaleString()}</p>
+                    <p className="total-amount">₹ {totalExpense.toLocaleString()}</p>
                     {filteredExpenseData.length ? (
                         <ResponsiveContainer width="100%" height={250}>
                             <PieChart>
@@ -368,16 +345,12 @@ const Dashboard = ({ onLogout, token }) => {
                 </div>
 
                 {/* Transactions Table */}
-                <div className="transaction-wrapper" style={{ flex: 1, minWidth: 500 }}>
+                <div className="transaction-wrapper">
                     <h3>All Transactions</h3>
-                    <div
-                        className="filter-row"
-                        style={{ marginBottom: 12, display: 'flex', gap: 12, flexWrap: 'wrap' }}
-                    >
+                    <div className="filter-row">
                         <select
                             value={filters.category}
                             onChange={e => setFilters(f => ({ ...f, category: e.target.value }))}
-                            style={{ padding: 6, minWidth: 140 }}
                         >
                             <option value="">All Categories</option>
                             {categories.map(cat => (
@@ -389,70 +362,63 @@ const Dashboard = ({ onLogout, token }) => {
                             placeholder="Min Amount"
                             value={filters.minAmount}
                             onChange={e => setFilters(f => ({ ...f, minAmount: e.target.value }))}
-                            style={{ padding: 6, width: 100 }}
                         />
                         <input
                             type="number"
                             placeholder="Max Amount"
                             value={filters.maxAmount}
                             onChange={e => setFilters(f => ({ ...f, maxAmount: e.target.value }))}
-                            style={{ padding: 6, width: 100 }}
                         />
                         <input
                             type="date"
                             value={filters.date}
                             onChange={e => setFilters(f => ({ ...f, date: e.target.value }))}
-                            style={{ padding: 6 }}
                         />
                     </div>
-                    <table
-                        className="transaction-table"
-                        style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 10 }}
-                    >
+                    <table className="transaction-table">
                         <thead>
-                        <tr style={{ borderBottom: '1px solid #ddd' }}>
-                            <th style={{ padding: 8 }}>Select</th>
-                            <th style={{ padding: 8 }}>Type</th>
-                            <th style={{ padding: 8 }}>Category</th>
-                            <th style={{ padding: 8 }}>Name</th>
-                            <th style={{ padding: 8 }}>Amount</th>
+                        <tr>
+                            <th>Select</th>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th>Name</th>
+                            <th>Amount</th>
                         </tr>
                         </thead>
                         <tbody>
                         {currentTransactions.length > 0 ? currentTransactions.map(tx => (
-                            <tr key={tx.id} style={{ borderBottom: '1px solid #eee' }}>
-                                <td style={{ padding: 6, textAlign: 'center' }}>
+                            <tr key={tx.id}>
+                                <td>
                                     <input
                                         type="checkbox"
                                         checked={selectedTransactions.includes(tx.id)}
                                         onChange={() => handleCheckboxChange(tx.id)}
                                     />
                                 </td>
-                                <td style={{ padding: 6, textTransform: 'capitalize' }}>{tx.transaction_type}</td>
-                                <td style={{ padding: 6 }}>{categories.find(c => c.id === tx.category_id)?.name || 'Unknown'}</td>
-                                <td style={{ padding: 6 }}>{tx.name}</td>
-                                <td style={{ padding: 6 }}>₹ {parseFloat(tx.amount).toLocaleString()}</td>
+                                <td style={{ textTransform: 'capitalize' }}>{tx.transaction_type}</td>
+                                <td>{categories.find(c => c.id === tx.category_id)?.name || 'Unknown'}</td>
+                                <td>{tx.name}</td>
+                                <td>₹ {parseFloat(tx.amount).toLocaleString()}</td>
                             </tr>
                         )) : (
-                            <tr><td colSpan={5} style={{ padding: 12, textAlign: 'center' }}>No transactions found</td></tr>
+                            <tr>
+                                <td colSpan={5} className="no-transactions">No transactions found</td>
+                            </tr>
                         )}
                         {Array.from({ length: emptyRows }).map((_, idx) => (
                             <tr key={`empty-row-${idx}`}>
-                                <td style={{ padding: 6 }}>&nbsp;</td>
-                                <td style={{ padding: 6 }}></td>
-                                <td style={{ padding: 6 }}></td>
-                                <td style={{ padding: 6 }}></td>
-                                <td style={{ padding: 6 }}></td>
+                                <td>&nbsp;</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
                             </tr>
                         ))}
                         </tbody>
                     </table>
-                    <div style={{ marginBottom: 10, display: 'flex', alignItems: 'center', flexDirection: 'row', gap: 4 }}>
+                    <div className="pagination">
                         {currentPage > 1 && (
-                            <button
-                                onClick={() => setCurrentPage(currentPage - 1)}
-                                style={{ marginRight: 6, padding: '2px 4px' }}
-                            >
+                            <button onClick={() => setCurrentPage(currentPage - 1)}>
                                 Prev
                             </button>
                         )}
@@ -460,36 +426,21 @@ const Dashboard = ({ onLogout, token }) => {
                             <button
                                 key={pageNum}
                                 onClick={() => setCurrentPage(pageNum)}
-                                style={{
-                                    marginRight: 6,
-                                    fontWeight: currentPage === pageNum ? 'bold' : 'normal',
-                                    background: currentPage === pageNum ? '#e9ecef' : undefined,
-                                    border: '1px solid #ccc',
-                                    borderRadius: 3,
-                                    padding: '2px 8px',
-                                    cursor: 'pointer'
-                                }}
+                                className={currentPage === pageNum ? 'active' : ''}
                                 disabled={currentPage === pageNum}
                             >
                                 {pageNum}
                             </button>
                         ))}
                         {currentPage < totalPages && (
-                            <button
-                                onClick={() => setCurrentPage(currentPage + 1)}
-                                style={{ padding: '2px 4px' }}
-                            >
+                            <button onClick={() => setCurrentPage(currentPage + 1)}>
                                 Next
                             </button>
                         )}
                     </div>
                     <div
+                        className="action-icons"
                         style={{
-                            display: 'flex',
-                            gap: 15,
-                            alignItems: 'center',
-                            marginBottom: 10,
-                            minHeight: 32,
                             visibility: selectedTransactions.length > 0 ? 'visible' : 'hidden'
                         }}
                     >
@@ -497,7 +448,7 @@ const Dashboard = ({ onLogout, token }) => {
                             <button
                                 onClick={handleEdit}
                                 title="Edit"
-                                style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                                className="edit-btn"
                                 aria-label="Edit transaction"
                             >
                                 <FaEdit size={22} color="#007bff" />
@@ -506,7 +457,7 @@ const Dashboard = ({ onLogout, token }) => {
                         <button
                             onClick={handleDelete}
                             title="Delete"
-                            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                            className="delete-btn"
                             aria-label="Delete transaction(s)"
                         >
                             <FaTrash size={22} color="#dc3545" />
@@ -514,60 +465,21 @@ const Dashboard = ({ onLogout, token }) => {
                     </div>
                     <button
                         onClick={openNewTransactionForm}
-                        style={{ padding: '8px 16px', cursor: 'pointer' }}
+                        className="new-transaction-btn"
                     >
                         New Transaction
                     </button>
                 </div>
             </div>
             {/* Sticky Balance Box */}
-            <div
-                className="balance-box"
-                style={{
-                    position: 'fixed',
-                    bottom: 30,
-                    right: 40,
-                    padding: 20,
-                    border: '2px solid #007bff',
-                    borderRadius: 8,
-                    textAlign: 'center',
-                    fontWeight: 'bold',
-                    fontSize: 20,
-                    color: balance >= 0 ? 'green' : 'red',
-                    background: 'white',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                    zIndex: 1200,
-                    minWidth: 180,
-                }}
-            >
+            <div className="balance-box">
                 Balance: ₹ {balance.toLocaleString()}
             </div>
             {/* Modal for Pie slice details */}
             {modalVisible && (
-                <div
-                    className="modal-overlay"
-                    style={{
-                        position: 'fixed',
-                        top: 0, left: 0, right: 0, bottom: 0,
-                        backgroundColor: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        zIndex: 1000,
-                    }}
-                    onClick={() => setModalVisible(false)}
-                >
+                <div className="modal-overlay" onClick={() => setModalVisible(false)}>
                     <div
                         className="modal-content"
-                        style={{
-                            backgroundColor: 'white',
-                            padding: 20,
-                            borderRadius: 10,
-                            minWidth: 300,
-                            maxWidth: 500,
-                            maxHeight: '80vh',
-                            overflowY: 'auto',
-                        }}
                         onClick={e => e.stopPropagation()}
                     >
                         <h3>{modalTitle}</h3>
@@ -593,7 +505,7 @@ const Dashboard = ({ onLogout, token }) => {
                                 </PieChart>
                             </ResponsiveContainer>
                         ) : <p>No transactions found.</p>}
-                        <button onClick={() => setModalVisible(false)} style={{ marginTop: 10 }}>
+                        <button onClick={() => setModalVisible(false)} className="modal-close-button">
                             Close
                         </button>
                     </div>
@@ -602,32 +514,14 @@ const Dashboard = ({ onLogout, token }) => {
 
             {/* Modal for New/Edit Transaction form */}
             {formModalVisible && (
-                <div
-                    className="modal-overlay"
-                    style={{
-                        position: 'fixed',
-                        top: 0, left: 0, right: 0, bottom: 0,
-                        backgroundColor: 'rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        zIndex: 1100,
-                    }}
-                    onClick={() => { if (!formLoading) setFormModalVisible(false); }}
-                >
+                <div className="modal-overlay" onClick={() => { if (!formLoading) setFormModalVisible(false); }}>
                     <form
                         onSubmit={handleFormSubmit}
-                        style={{
-                            backgroundColor: 'white',
-                            padding: 20,
-                            borderRadius: 10,
-                            minWidth: 320,
-                            maxWidth: 420,
-                        }}
+                        className="modal-content"
                         onClick={e => e.stopPropagation()}
                     >
                         <h3>{formData.id ? 'Edit Transaction' : 'New Transaction'}</h3>
-                        <label style={{ display: 'block', marginBottom: 6 }}>
+                        <label>
                             Type:
                             {formData.id ? (
                                 <span style={{ marginLeft: 8, fontWeight: 500, textTransform: 'capitalize' }}>
@@ -646,14 +540,13 @@ const Dashboard = ({ onLogout, token }) => {
                                 </select>
                             )}
                         </label>
-                        <label style={{ display: 'block', marginBottom: 6 }}>
+                        <label>
                             Category:
                             <select
                                 name="category_id"
                                 value={formData.category_id}
                                 onChange={handleFormChange}
                                 disabled={formLoading}
-                                style={{ marginLeft: 6 }}
                                 required
                             >
                                 {categories.map(cat => (
@@ -661,7 +554,7 @@ const Dashboard = ({ onLogout, token }) => {
                                 ))}
                             </select>
                         </label>
-                        <label style={{ display: 'block', marginBottom: 6 }}>
+                        <label>
                             Name:
                             <input
                                 type="text"
@@ -670,10 +563,9 @@ const Dashboard = ({ onLogout, token }) => {
                                 onChange={handleFormChange}
                                 disabled={formLoading}
                                 required
-                                style={{ width: '100%', padding: 6, marginTop: 4 }}
                             />
                         </label>
-                        <label style={{ display: 'block', marginBottom: 6 }}>
+                        <label>
                             Amount (₹):
                             <input
                                 type="number"
@@ -684,19 +576,17 @@ const Dashboard = ({ onLogout, token }) => {
                                 required
                                 min="0.01"
                                 step="0.01"
-                                style={{ width: '100%', padding: 6, marginTop: 4 }}
                             />
                         </label>
-                        {formError && <p style={{ color: 'red' }}>{formError}</p>}
-                        <div style={{ marginTop: 10, display: 'flex', gap: 10 }}>
-                            <button type="submit" disabled={formLoading} style={{ flex: 1, cursor: 'pointer' }}>
+                        {formError && <p>{formError}</p>}
+                        <div className="modal-form-actions">
+                            <button type="submit" disabled={formLoading}>
                                 {formLoading ? 'Saving...' : 'Save'}
                             </button>
                             <button
                                 type="button"
                                 onClick={() => !formLoading && setFormModalVisible(false)}
                                 disabled={formLoading}
-                                style={{ flex: 1, cursor: 'pointer' }}
                             >
                                 Cancel
                             </button>
@@ -706,34 +596,11 @@ const Dashboard = ({ onLogout, token }) => {
             )}
 
             {/* Monthly Income/Expense Chart at Bottom (not sticky) */}
-            <div style={{
-                width: '100vw',
-                position: 'relative',
-                left: '50%',
-                right: '50%',
-                marginLeft: '-50vw',
-                marginRight: '-50vw',
-                background: 'white',
-                borderTop: '1px solid #eee',
-                boxShadow: '0 -2px 8px rgba(0,0,0,0.04)',
-                padding: '16px 0 8px 0',
-                marginTop: 40,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center'
-            }}>
-                <h2 style={{
-                    width: '100%',
-                    textAlign: 'center',
-                    margin: '0 0 18px 0',
-                    fontWeight: 600,
-                    fontSize: 22,
-                    letterSpacing: 1,
-                    color: '#333'
-                }}>
+            <div className="bottom-bar-chart">
+                <h2 className="bottom-bar-chart-title">
                     Monthly Expense vs Budget
                 </h2>
-                <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 24 }}>
+                <div className="bottom-bar-chart-controls">
                     <label>
                         Year:&nbsp;
                         <select value={year} onChange={e => setYear(Number(e.target.value))}>
@@ -742,7 +609,7 @@ const Dashboard = ({ onLogout, token }) => {
                             ))}
                         </select>
                     </label>
-                    <div style={{ fontSize: 15, color: '#555', display: 'flex', gap: 18 }}>
+                    <div>
                         <span>
                             Budget per Month:&nbsp;
                             <input
@@ -751,20 +618,11 @@ const Dashboard = ({ onLogout, token }) => {
                                 min={0}
                                 step={1}
                                 onChange={e => setStartingMonthlyIncome(Number(e.target.value))}
-                                style={{
-                                    width: 100,
-                                    color: '#00C49F',
-                                    fontWeight: 'bold',
-                                    border: '1px solid #00C49F',
-                                    borderRadius: 4,
-                                    padding: '2px 6px',
-                                    marginLeft: 4
-                                }}
                             />
                         </span>
                     </div>
                 </div>
-                <div style={{ width: '90vw', maxWidth: 1200, height: 320 }}>
+                <div className="bottom-bar-chart-container">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={monthlyChartData.map(m => ({
                             month: m.month,
