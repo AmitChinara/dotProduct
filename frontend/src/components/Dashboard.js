@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
+import ROUTES from '../constants/routes';
 import {
     PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer,
     BarChart, Bar, XAxis, YAxis, CartesianGrid
@@ -37,16 +38,15 @@ const Dashboard = ({ onLogout, token }) => {
     // Fetch all data (categories, income, expenses)
     const fetchData = async () => {
         try {
-            const config = { headers: { Authorization: `Token ${token}` } };
-            const categoriesRes = await axios.get('http://127.0.0.1:8000/api/category/', config);
+            const categoriesRes = await axiosInstance.get(ROUTES.CATEGORY_URL);
             const categoriesData = categoriesRes.data.payload;
             setCategories(categoriesData);
             if (!formData.category_id && categoriesData.length > 0) {
                 setFormData(fd => ({ ...fd, category_id: categoriesData[0].id }));
             }
             const [incomeRes, expenseRes] = await Promise.all([
-                axios.get('http://127.0.0.1:8000/api/income/', config),
-                axios.get('http://127.0.0.1:8000/api/expenses/', config),
+                axiosInstance.get(ROUTES.INCOME_URL),
+                axiosInstance.get(ROUTES.EXPENSES_URL),
             ]);
             const allTx = [...incomeRes.data.payload, ...expenseRes.data.payload];
             setAllTransactions(allTx);
@@ -171,9 +171,7 @@ const Dashboard = ({ onLogout, token }) => {
 
     const handleLogout = async () => {
         try {
-            await axios.post('http://127.0.0.1:8000/api/logout/', {}, {
-                headers: { Authorization: `Token ${token}` },
-            });
+            await axiosInstance.post(ROUTES.LOGOUT_URL, {});
         } catch (err) {
             console.error('Logout failed', err);
         } finally {
@@ -185,14 +183,13 @@ const Dashboard = ({ onLogout, token }) => {
     const handleDelete = async () => {
         if (!window.confirm(`Delete ${selectedTransactions.length} selected transaction(s)?`)) return;
         try {
-            const config = { headers: { Authorization: `Token ${token}` } };
             await Promise.all(selectedTransactions.map(id => {
                 const tx = allTransactions.find(t => t.id === id);
                 if (!tx) return Promise.resolve();
                 if (tx.transaction_type === 'income') {
-                    return axios.delete(`http://127.0.0.1:8000/api/income/delete/${id}/`, config);
+                    return axiosInstance.delete(ROUTES.INCOME_DELETE_URL(id));
                 } else {
-                    return axios.delete(`http://127.0.0.1:8000/api/expenses/delete/${id}/`, config);
+                    return axiosInstance.delete(ROUTES.EXPENSES_DELETE_URL(id));
                 }
             }));
             await fetchData();
@@ -227,7 +224,6 @@ const Dashboard = ({ onLogout, token }) => {
         setFormLoading(true);
         setFormError('');
         try {
-            const config = { headers: { Authorization: `Token ${token}` } };
             const payload = {
                 transaction_type: formData.transaction_type,
                 category_id: formData.category_id,
@@ -236,15 +232,15 @@ const Dashboard = ({ onLogout, token }) => {
             };
             if (formData.id) {
                 if (formData.transaction_type === 'income') {
-                    await axios.put(`http://127.0.0.1:8000/api/income/update/${formData.id}/`, payload, config);
+                    await axiosInstance.put(ROUTES.INCOME_UPDATE_URL(formData.id), payload);
                 } else {
-                    await axios.put(`http://127.0.0.1:8000/api/expenses/update/${formData.id}/`, payload, config);
+                    await axiosInstance.put(ROUTES.EXPENSES_UPDATE_URL(formData.id), payload);
                 }
             } else {
                 if (formData.transaction_type === 'income') {
-                    await axios.post('http://127.0.0.1:8000/api/income/create/', payload, config);
+                    await axiosInstance.post(ROUTES.INCOME_CREATE_URL, payload);
                 } else {
-                    await axios.post('http://127.0.0.1:8000/api/expenses/create/', payload, config);
+                    await axiosInstance.post(ROUTES.EXPENSES_CREATE_URL, payload);
                 }
             }
             await fetchData();
