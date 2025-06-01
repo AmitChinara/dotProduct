@@ -33,7 +33,7 @@ const Dashboard = ({ onLogout, token }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [year, setYear] = useState(new Date().getFullYear());
     const [monthlyChartData, setMonthlyChartData] = useState([]);
-    const [startingMonthlyIncome, setStartingMonthlyIncome] = useState(2000);
+    const [startingMonthlyIncome, setStartingMonthlyIncome] = useState(20000);
 
     // Fetch all data (categories, income, expenses)
     const fetchData = async () => {
