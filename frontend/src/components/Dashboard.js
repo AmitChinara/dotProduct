@@ -20,57 +20,77 @@ const Dashboard = ({ onLogout, token }) => {
 
     const itemsPerPage = 7;
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const config = {
-                    headers: { Authorization: `Token ${token}` },
-                };
+    // New modal state for transaction form
+    const [formModalVisible, setFormModalVisible] = useState(false);
 
-                const categoriesRes = await axios.get('http://127.0.0.1:8000/api/category/', config);
-                const categoriesData = categoriesRes.data.payload;
+    // Form states
+    const [formData, setFormData] = useState({
+        transaction_type: 'income',
+        category_id: '',
+        name: '',
+        amount: '',
+    });
+    const [formLoading, setFormLoading] = useState(false);
+    const [formError, setFormError] = useState('');
 
-                const categoryMap = {};
-                categoriesData.forEach(cat => {
-                    categoryMap[cat.id] = cat.name;
-                });
-                setCategories(categoriesData);
+    // Fetch data function (used on mount and after form submit)
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const config = {
+                headers: { Authorization: `Token ${token}` },
+            };
 
-                const [incomeRes, expenseRes] = await Promise.all([
-                    axios.get('http://127.0.0.1:8000/api/income/', config),
-                    axios.get('http://127.0.0.1:8000/api/expenses/', config),
-                ]);
+            const categoriesRes = await axios.get('http://127.0.0.1:8000/api/category/', config);
+            const categoriesData = categoriesRes.data.payload;
+            setCategories(categoriesData);
 
-                const allData = [...incomeRes.data.payload, ...expenseRes.data.payload];
-                setAllTransactions(allData);
-                setFilteredTransactions(allData);
-
-                const groupByCategory = (data) => {
-                    const map = {};
-                    data.forEach(item => {
-                        const categoryName = categoryMap[item.category_id] || 'Unknown';
-                        const amount = parseFloat(item.amount);
-                        if (map[categoryName]) {
-                            map[categoryName] += amount;
-                        } else {
-                            map[categoryName] = amount;
-                        }
-                    });
-                    return Object.entries(map).map(([category, amount]) => ({
-                        category,
-                        amount
-                    }));
-                };
-
-                setIncomeData(groupByCategory(incomeRes.data.payload));
-                setExpenseData(groupByCategory(expenseRes.data.payload));
-                setLoading(false);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                setLoading(false);
+            // Set default category_id for form if empty
+            if (!formData.category_id && categoriesData.length > 0) {
+                setFormData(prev => ({ ...prev, category_id: categoriesData[0].id }));
             }
-        };
 
+            const categoryMap = {};
+            categoriesData.forEach(cat => {
+                categoryMap[cat.id] = cat.name;
+            });
+
+            const [incomeRes, expenseRes] = await Promise.all([
+                axios.get('http://127.0.0.1:8000/api/income/', config),
+                axios.get('http://127.0.0.1:8000/api/expenses/', config),
+            ]);
+
+            const allData = [...incomeRes.data.payload, ...expenseRes.data.payload];
+            setAllTransactions(allData);
+            setFilteredTransactions(allData);
+
+            const groupByCategory = (data) => {
+                const map = {};
+                data.forEach(item => {
+                    const categoryName = categoryMap[item.category_id] || 'Unknown';
+                    const amount = parseFloat(item.amount);
+                    if (map[categoryName]) {
+                        map[categoryName] += amount;
+                    } else {
+                        map[categoryName] = amount;
+                    }
+                });
+                return Object.entries(map).map(([category, amount]) => ({
+                    category,
+                    amount
+                }));
+            };
+
+            setIncomeData(groupByCategory(incomeRes.data.payload));
+            setExpenseData(groupByCategory(expenseRes.data.payload));
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchData();
     }, [token]);
 
@@ -85,7 +105,7 @@ const Dashboard = ({ onLogout, token }) => {
         });
         setFilteredTransactions(filtered);
         setCurrentPage(1);
-    }, [filters]);
+    }, [filters, allTransactions, categories]);
 
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28FFF', '#FF6B6B'];
 
@@ -232,6 +252,15 @@ const Dashboard = ({ onLogout, token }) => {
                             <button onClick={() => setCurrentPage(currentPage + 1)}>Next</button>
                         )}
                     </div>
+
+                    {/* New Transaction Button */}
+                    <button
+                        className="new-transaction-btn"
+                        onClick={() => setFormModalVisible(true)}
+                        style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer', width: 'fit-content' }}
+                    >
+                        New Transaction
+                    </button>
                 </div>
             </div>
 
@@ -240,6 +269,7 @@ const Dashboard = ({ onLogout, token }) => {
                 <p>₹ {balance.toLocaleString()}</p>
             </div>
 
+            {/* Chart Modal */}
             {modalVisible && (
                 <div className="modal-overlay">
                     <div className="modal-content">
@@ -273,6 +303,123 @@ const Dashboard = ({ onLogout, token }) => {
                                 </PieChart>
                             </ResponsiveContainer>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Form Modal */}
+            {formModalVisible && (
+                <div className="modal-overlay">
+                    <div className="modal-content" style={{ maxWidth: '400px', padding: '20px', position: 'relative' }}>
+                        <button
+                            className="modal-close-button"
+                            onClick={() => setFormModalVisible(false)}
+                            style={{
+                                position: 'absolute',
+                                top: '10px',
+                                right: '15px',
+                                fontSize: '20px',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            &times;
+                        </button>
+
+                        <h3>Add New Transaction</h3>
+
+                        <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            setFormError('');
+                            setFormLoading(true);
+                            try {
+                                const url = formData.transaction_type === 'income'
+                                    ? 'http://127.0.0.1:8000/api/income/create/'
+                                    : 'http://127.0.0.1:800/api/expenses/create/';
+                                console.log(url)
+                                await axios.post(url, {
+                                    name: formData.name,
+                                    category_id: formData.category_id,
+                                    amount: parseFloat(formData.amount),
+                                }, {
+                                    headers: { Authorization: `Token ${token}` },
+                                });
+
+                                await fetchData();
+
+                                setFormData(prev => ({
+                                    ...prev,
+                                    name: '',
+                                    amount: '',
+                                }));
+                                setFormModalVisible(false);
+                            } catch (error) {
+                                setFormError('Failed to submit transaction. Please check your input.');
+                                console.error(`error: ${error}`);
+                            } finally {
+                                setFormLoading(false);
+                            }
+                        }}>
+                            <label>
+                                Transaction Type:
+                                <select
+                                    name="transaction_type"
+                                    value={formData.transaction_type}
+                                    onChange={e => setFormData(prev => ({ ...prev, transaction_type: e.target.value }))}
+                                    required
+                                >
+                                    <option value="income">Income</option>
+                                    <option value="expense">Expense</option>
+                                </select>
+                            </label>
+
+                            <label>
+                                Category:
+                                <select
+                                    name="category_id"
+                                    value={formData.category_id}
+                                    onChange={e => setFormData(prev => ({ ...prev, category_id: e.target.value }))}
+                                    required
+                                >
+                                    {categories.map(cat => (
+                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                    ))}
+                                </select>
+                            </label>
+
+                            <label>
+                                Name:
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                                    placeholder="Transaction Name"
+                                    required
+                                />
+                            </label>
+
+                            <label>
+                                Amount:
+                                <input
+                                    type="number"
+                                    name="amount"
+                                    value={formData.amount}
+                                    onChange={e => setFormData(prev => ({ ...prev, amount: e.target.value }))}
+                                    placeholder="Amount"
+                                    min="0"
+                                    step="0.01"
+                                    required
+                                />
+                            </label>
+
+                            {formError && <p style={{ color: 'red' }}>{formError}</p>}
+
+                            <button type="submit" disabled={formLoading} style={{ cursor: formLoading ? 'not-allowed' : 'pointer' }}>
+                                {formLoading ? 'Submitting...' : 'Add Transaction'}
+                            </button>
+                        </form>
                     </div>
                 </div>
             )}

@@ -19,7 +19,9 @@
     margin: 0;
 }
 
-.header-row button {
+/* New Transaction Button - matches your header button style */
+.header-row button,
+.new-transaction-btn {
     padding: 10px 20px;
     font-size: 1rem;
     color: white;
@@ -31,7 +33,8 @@
     width: 14%;
 }
 
-.header-row button:hover {
+.header-row button:hover,
+.new-transaction-btn:hover {
     background-color: #0056b3;
 }
 
@@ -110,7 +113,6 @@
 .filter-container .filter-button:hover {
     background-color: #0056b3;
 }
-
 
 /* Transaction table */
 .transaction-table {
@@ -260,6 +262,7 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
+/* Close button on modal */
 .modal-close-button {
     position: absolute;
     top: 10px;
@@ -270,4 +273,68 @@
     border: none;
     cursor: pointer;
     width: fit-content;
+}
+
+/* Modal form styles */
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.modal-content label {
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="number"],
+.modal-content input[type="date"],
+.modal-content select {
+    margin-top: 6px;
+    padding: 8px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    transition: border-color 0.3s ease;
+}
+
+.modal-content input[type="text"]:focus,
+.modal-content input[type="number"]:focus,
+.modal-content input[type="date"]:focus,
+.modal-content select:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.modal-content button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    font-weight: 600;
+    padding: 10px 0;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.modal-content button[type="submit"]:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.modal-content button[type="submit"]:disabled {
+    background-color: #a0c1f7;
+    cursor: not-allowed;
+}
+
+/* Error message inside modal */
+.modal-content p {
+    color: red;
+    font-size: 13px;
+    margin: 0;
 }
