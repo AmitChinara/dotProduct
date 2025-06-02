@@ -1,7 +1,27 @@
 # DotProduct
 
 DotProduct is a full-stack personal finance management application. It helps you track your income and expenses, visualize your spending, set monthly budgets, and analyze your financial health with interactive charts.
+---
+## Screenshot
+- **Login:** Enter your username and password to access your dashboard.  
+  📸 *Login Screen:*  
+  ![Login Page](https://github.com/user-attachments/assets/fbb0a68b-9595-4593-8341-632825a6f3c9)
+- **User Authentication:** Secure login/logout with token-based authentication.
+- **Category Management:** Organize transactions by customizable categories.
+- **Income & Expense Tracking:** Add, edit, and delete transactions.  
+  ![Add Transaction](https://github.com/user-attachments/assets/db35eae7-bb3d-4221-b4f4-a54c98dca7b0)  
+  ![New Transaction](https://github.com/user-attachments/assets/e6635299-398c-4e2d-b4e3-6aef6c71b928)  
+  ![Delete Transaction](https://github.com/user-attachments/assets/92581209-6542-4b64-8ea1-c9e96d0461c4)
 
+- **Interactive Charts:** Visualize income and expenses by category and month using pie and bar charts.  
+  ![Pie Chart](https://github.com/user-attachments/assets/8a0b6759-c711-4ad9-aa69-49d657b262e7)
+
+- **Budgeting:** Set and compare monthly budgets against actual expenses.  
+  ![Monthly Budget](https://github.com/user-attachments/assets/0e33b886-810e-48e1-a2ac-5d704bb15d1f)
+
+- **Responsive UI:** Clean, modern interface with sticky balance and navigation.
+- **Pagination & Filtering:** Easily browse and filter transactions.  
+  ![Filter](https://github.com/user-attachments/assets/c5a1d6ca-34b4-474b-81e8-cc36ece7c5bb)
 ---
 
 ## Features
