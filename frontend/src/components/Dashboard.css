@@ -7,6 +7,11 @@
     position: relative;
 }
 
+/* Prevent horizontal scroll on the entire page */
+body {
+    overflow-x: hidden;
+}
+
 /* Navigation Bar */
 .dashboard-navbar {
     width: 98vw;
