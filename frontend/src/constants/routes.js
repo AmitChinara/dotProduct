@@ -1,3 +1,7 @@
+/**
+ * routes.js - Centralizes all API endpoint paths for easy maintenance.
+ */
+
 const ROUTES = {
     CATEGORY_URL: 'category/',
     INCOME_URL: 'income/',
@@ -13,3 +17,4 @@ const ROUTES = {
 };
 
 export default ROUTES;
+

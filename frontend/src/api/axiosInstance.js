@@ -1,11 +1,15 @@
-// src/api/axiosInstance.js
+/**
+ * axiosInstance.js - Configures Axios for API requests.
+ * Sets base URL and attaches authentication token to each request.
+ */
+
 import axios from 'axios';
 
 const axiosInstance = axios.create({
     baseURL: 'https://dotproduct-02kn.onrender.com/api/',
 });
 
-// Use 'authToken' to match your login/localStorage usage
+// Attach auth token from localStorage to every request if available
 axiosInstance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('authToken');
@@ -18,3 +22,4 @@ axiosInstance.interceptors.request.use(
 );
 
 export default axiosInstance;
+

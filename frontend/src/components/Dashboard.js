@@ -1,3 +1,16 @@
+/**
+ * Dashboard component for the DotProduct app.
+ * Handles fetching, displaying, and managing income/expense transactions,
+ * category management, pie/bar charts, and user interactions.
+ * 
+ * Features:
+ * - Pie charts for income and expense by category
+ * - All Transactions table with filters, pagination, edit/delete
+ * - Modal for transaction details and editing/creating transactions
+ * - Monthly Expense vs Budget bar chart
+ * - Sticky balance box and navigation bar
+ */
+
 import React, { useState, useEffect, useMemo } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import ROUTES from '../constants/routes';
@@ -11,6 +24,7 @@ import './Dashboard.css';
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28FFF', '#FF6B6B'];
 
 const Dashboard = ({ onLogout, token }) => {
+    // State for categories, transactions, filters, modals, and forms
     const [categories, setCategories] = useState([]);
     const [allTransactions, setAllTransactions] = useState([]);
     const [filteredTransactions, setFilteredTransactions] = useState([]);
@@ -35,7 +49,10 @@ const Dashboard = ({ onLogout, token }) => {
     const [monthlyChartData, setMonthlyChartData] = useState([]);
     const [startingMonthlyIncome, setStartingMonthlyIncome] = useState(20000);
 
-    // Fetch all data (categories, income, expenses)
+    /**
+     * Fetch all categories, incomes, and expenses from the backend.
+     * Updates state for categories and transactions.
+     */
     const fetchData = async () => {
         try {
             const categoriesRes = await axiosInstance.get(ROUTES.CATEGORY_URL);
@@ -58,9 +75,13 @@ const Dashboard = ({ onLogout, token }) => {
         }
     };
 
+    // Fetch data on mount or when token changes
     // eslint-disable-next-line
     useEffect(() => { fetchData(); }, [token]);
 
+    /**
+     * Apply filters to transactions whenever filters, allTransactions, or categories change.
+     */
     useEffect(() => {
         const { category, minAmount, maxAmount, date } = filters;
         const filtered = allTransactions.filter(tx => {
@@ -76,6 +97,9 @@ const Dashboard = ({ onLogout, token }) => {
         setSelectedTransactions([]);
     }, [filters, allTransactions, categories]);
 
+    /**
+     * Memoized calculation of filtered income data for the pie chart.
+     */
     const filteredIncomeData = useMemo(() => {
         const catMap = {};
         categories.forEach(c => (catMap[c.id] = c.name));
@@ -88,6 +112,9 @@ const Dashboard = ({ onLogout, token }) => {
         return Object.entries(map).map(([category, amount]) => ({ category, amount }));
     }, [filteredTransactions, categories]);
 
+    /**
+     * Memoized calculation of filtered expense data for the pie chart.
+     */
     const filteredExpenseData = useMemo(() => {
         const catMap = {};
         categories.forEach(c => (catMap[c.id] = c.name));
@@ -100,10 +127,11 @@ const Dashboard = ({ onLogout, token }) => {
         return Object.entries(map).map(([category, amount]) => ({ category, amount }));
     }, [filteredTransactions, categories]);
 
+    // Calculate totals for filtered income and expense
     const totalIncome = filteredIncomeData.reduce((sum, x) => sum + x.amount, 0);
     const totalExpense = filteredExpenseData.reduce((sum, x) => sum + x.amount, 0);
 
-    // Calculate balance from all transactions, not filtered
+    // Calculate balance from all transactions (not filtered)
     const allIncome = useMemo(() =>
         allTransactions.filter(tx => tx.transaction_type === 'income')
             .reduce((sum, tx) => sum + parseFloat(tx.amount), 0)
@@ -114,6 +142,9 @@ const Dashboard = ({ onLogout, token }) => {
     , [allTransactions]);
     const balance = allIncome - allExpense;
 
+    /**
+     * Get all years present in the transactions for the year dropdown.
+     */
     const getAvailableYears = () => {
         const years = new Set();
         allTransactions.forEach(tx => {
@@ -124,6 +155,9 @@ const Dashboard = ({ onLogout, token }) => {
         return Array.from(years).sort((a, b) => b - a);
     };
 
+    /**
+     * Calculate monthly income and expense for the selected year.
+     */
     useEffect(() => {
         const months = Array.from({ length: 12 }, (_, i) => ({
             month: new Date(0, i).toLocaleString('default', { month: 'short' }),
@@ -145,6 +179,9 @@ const Dashboard = ({ onLogout, token }) => {
         setMonthlyChartData(months);
     }, [allTransactions, year]);
 
+    /**
+     * Handle clicking a pie chart slice to show a modal with details for that category/type.
+     */
     const handleSliceClick = (categoryName, type) => {
         const filtered = allTransactions.filter(tx =>
             (categories.find(c => c.id === tx.category_id)?.name === categoryName)
@@ -159,16 +196,23 @@ const Dashboard = ({ onLogout, token }) => {
         setModalVisible(true);
     };
 
+    // Pagination logic for transactions table
     const startIndex = (currentPage - 1) * itemsPerPage;
     const currentTransactions = filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
     const emptyRows = itemsPerPage - currentTransactions.length > 0 ? itemsPerPage - currentTransactions.length : 0;
 
+    /**
+     * Handle selecting/deselecting a transaction row.
+     */
     const handleCheckboxChange = (id) => {
         setSelectedTransactions(prev =>
             prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
         );
     };
 
+    /**
+     * Handle user logout.
+     */
     const handleLogout = async () => {
         try {
             await axiosInstance.post(ROUTES.LOGOUT_URL, {});
@@ -180,6 +224,9 @@ const Dashboard = ({ onLogout, token }) => {
         }
     };
 
+    /**
+     * Handle deleting selected transactions.
+     */
     const handleDelete = async () => {
         if (!window.confirm(`Delete ${selectedTransactions.length} selected transaction(s)?`)) return;
         try {
@@ -199,6 +246,9 @@ const Dashboard = ({ onLogout, token }) => {
         }
     };
 
+    /**
+     * Handle editing a selected transaction (only one at a time).
+     */
     const handleEdit = () => {
         if (selectedTransactions.length !== 1) return;
         const tx = allTransactions.find(t => t.id === selectedTransactions[0]);
@@ -214,11 +264,17 @@ const Dashboard = ({ onLogout, token }) => {
         setFormModalVisible(true);
     };
 
+    /**
+     * Handle changes in the transaction form fields.
+     */
     const handleFormChange = (e) => {
         const { name, value } = e.target;
         setFormData(fd => ({ ...fd, [name]: value }));
     };
 
+    /**
+     * Handle submitting the transaction form (create or update).
+     */
     const handleFormSubmit = async (e) => {
         e.preventDefault();
         setFormLoading(true);
@@ -253,6 +309,9 @@ const Dashboard = ({ onLogout, token }) => {
         }
     };
 
+    /**
+     * Open the form modal for creating a new transaction.
+     */
     const openNewTransactionForm = () => {
         setFormData({
             transaction_type: 'income',
@@ -267,6 +326,7 @@ const Dashboard = ({ onLogout, token }) => {
 
     const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
 
+    // --- Render UI ---
     return (
         <div className="dashboard-container">
             {/* Navigation Bar */}
@@ -412,6 +472,7 @@ const Dashboard = ({ onLogout, token }) => {
                         ))}
                         </tbody>
                     </table>
+                    {/* Pagination controls */}
                     <div className="pagination">
                         {currentPage > 1 && (
                             <button onClick={() => setCurrentPage(currentPage - 1)}>
@@ -434,6 +495,7 @@ const Dashboard = ({ onLogout, token }) => {
                             </button>
                         )}
                     </div>
+                    {/* Edit/Delete action icons */}
                     <div
                         className="action-icons"
                         style={{
@@ -660,3 +722,4 @@ const Dashboard = ({ onLogout, token }) => {
 };
 
 export default Dashboard;
+
