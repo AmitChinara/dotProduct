@@ -13,7 +13,7 @@ def getCategories(request):
     Retrieve all categories created by the authenticated user.
     """
     user = request.user
-    category_obj = Category.objects.filter(created_by=user)  # Fetch all Category entries from the database
+    category_obj = Category.objects.all()  # Fetch all Category entries from the database
     category_serializers = CategorySerializer(category_obj, many=True)  # Serialize queryset to JSON
     return Response({'status': 200, 'payload': category_serializers.data})  # Return serialized data
 
