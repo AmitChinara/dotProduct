@@ -270,8 +270,8 @@ const Dashboard = ({ onLogout, token }) => {
     return (
         <div className="dashboard-container">
             {/* Navigation Bar */}
-            <nav className="dashboard-navbar">
-                <span className="dashboard-title">DotProduct</span>
+            <nav className="dashboard-navbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span className="dashboard-title" style={{ color: '#000', fontWeight: 700, fontSize: 22 }}>DotProduct</span>
                 <button
                     onClick={handleLogout}
                     className="dashboard-logout-btn"
@@ -593,7 +593,14 @@ const Dashboard = ({ onLogout, token }) => {
 
             {/* Monthly Income/Expense Chart at Bottom (not sticky) */}
             <div className="bottom-bar-chart">
-                <h2 className="bottom-bar-chart-title">
+                <h2
+                    className="bottom-bar-chart-title"
+                    style={{
+                        textAlign: 'left',
+                        userSelect: 'text',
+                        marginLeft: 24
+                    }}
+                >
                     Monthly Expense vs Budget
                 </h2>
                 <div className="bottom-bar-chart-controls">
