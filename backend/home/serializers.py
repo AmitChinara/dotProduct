@@ -1,3 +1,6 @@
+# DRF serializers for the 'home' app.
+# Used to convert model instances to and from JSON for API endpoints.
+
 from rest_framework import serializers
 from .models import Category, Transaction
 

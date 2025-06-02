@@ -9,6 +9,9 @@ from ..serializers import TransactionSerializer
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getIncomes(request):
+    """
+    Retrieve all income transactions for the authenticated user.
+    """
     incomes = Transaction.objects.filter(updated_by=request.user, transaction_type='income')
     serializer = TransactionSerializer(incomes, many=True)
     return Response({'status': 200, 'payload': serializer.data})
@@ -18,6 +21,9 @@ def getIncomes(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def createIncome(request):
+    """
+    Create a new income transaction for the authenticated user.
+    """
     data = request.data.copy()
     data['user_id'] = request.user.id
     data['transaction_type'] = 'income'
@@ -36,6 +42,9 @@ def createIncome(request):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def updateIncome(request, id):
+    """
+    Update an existing income transaction for the authenticated user.
+    """
     try:
         income = Transaction.objects.get(id=id, updated_by=request.user, transaction_type='income')
     except Transaction.DoesNotExist:
@@ -53,9 +62,13 @@ def updateIncome(request, id):
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def deleteIncome(request, id):
+    """
+    Delete an income transaction for the authenticated user.
+    """
     try:
         income = Transaction.objects.get(id=id, updated_by=request.user, transaction_type='income')
         income.delete()
         return Response({'status': 200, 'message': 'Income deleted successfully'})
     except Transaction.DoesNotExist:
         return Response({'status': 404, 'message': 'Income not found'})
+

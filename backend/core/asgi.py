@@ -1,8 +1,8 @@
 """
 ASGI config for core project.
 
-It exposes the ASGI callable as a module-level variable named ``application``.
-
+This file exposes the ASGI callable as a module-level variable named ``application``.
+It is used for deploying the Django project using ASGI servers.
 For more information on this file, see
 https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 """

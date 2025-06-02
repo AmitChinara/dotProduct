@@ -1,3 +1,5 @@
+# URL patterns for expense-related endpoints in the 'home' app.
+
 from django.urls import path
 from ..views.expense import *
 
@@ -7,3 +9,4 @@ urlpatterns = [
     path('expenses/update/<int:id>/', updateExpenses),  # PUT: Update an expense by its ID
     path('expenses/delete/<int:id>/', deleteExpenses),  # DELETE: Delete an expense by its ID
 ]
+

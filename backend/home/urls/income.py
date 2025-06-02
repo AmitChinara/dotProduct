@@ -1,3 +1,5 @@
+# URL patterns for income-related endpoints in the 'home' app.
+
 from django.urls import path
 from ..views.income import *
 
@@ -7,3 +9,4 @@ urlpatterns = [
     path('income/update/<int:id>/', updateIncome),    # PUT: Update an income record by ID
     path('income/delete/<int:id>/', deleteIncome),    # DELETE: Delete an income record by ID
 ]
+

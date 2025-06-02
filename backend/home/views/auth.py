@@ -11,6 +11,10 @@ from rest_framework.authtoken.models import Token
 @authentication_classes([BasicAuthentication])
 @permission_classes([AllowAny])
 def loginView(request):
+    """
+    Authenticates a user and returns a token if credentials are valid.
+    Expects 'username' and 'password' in the request data.
+    """
     username = request.data.get('username')
     password = request.data.get('password')
 
@@ -28,6 +32,9 @@ def loginView(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logoutView(request):
+    """
+    Logs out the authenticated user by deleting their token.
+    """
     try:
         # Delete the token to force login again
         request.user.auth_token.delete()
@@ -35,3 +42,4 @@ def logoutView(request):
         return Response({'error': 'Token not found'}, status=status.HTTP_400_BAD_REQUEST)
 
     return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
+

@@ -9,6 +9,9 @@ from ..serializers import *
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getCategories(request):
+    """
+    Retrieve all categories created by the authenticated user.
+    """
     user = request.user
     category_obj = Category.objects.filter(created_by=user)  # Fetch all Category entries from the database
     category_serializers = CategorySerializer(category_obj, many=True)  # Serialize queryset to JSON
@@ -19,6 +22,9 @@ def getCategories(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def createCategory(request):
+    """
+    Create a new category for the authenticated user.
+    """
     data = request.data.copy()
     data['created_by'] = request.user.username
     data['updated_by'] = request.user.username
@@ -35,3 +41,4 @@ def createCategory(request):
 
     category_serializers.save()  # Save valid data to the database
     return Response({'status': 200, 'message': 'Successfully created the category.'})
+

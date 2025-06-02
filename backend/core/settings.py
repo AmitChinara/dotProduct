@@ -1,3 +1,5 @@
+# This file contains the main settings and configuration for the Django 'core' project.
+
 from pathlib import Path
 import os
 
